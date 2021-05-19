@@ -29,36 +29,36 @@ void loop() {
 
   //方向補正
   if (gyro_x < 359.50 && gyro_x > 180) {
-    cw(0, 120);
+    cw(0, 150);
   } else if (gyro_x > 0.50 && gyro_x < 180) {
-    ccw(0, 120);
+    ccw(0, 150);
   } else {
-    moter(0, 120);
+    moter(0, 150);
   }
 
   //delay(5);
 }
 
 void moter(int rot, int pwm) {
-  int pwm_r = pwm;
+  int pwm_l = pwm -30;
 
   if (rot) {
     digitalWrite(9, LOW);
-    analogWrite(3, pwm);
-    analogWrite(10, pwm_r);
+    analogWrite(3, pwm_l);
+    analogWrite(10, pwm);
     digitalWrite(11, LOW);
   } else {
-    analogWrite(9, pwm);
+    analogWrite(9, pwm_l);
     digitalWrite(3, LOW);
     digitalWrite(11, LOW);
-    analogWrite(10, pwm_r);
+    analogWrite(10, pwm);
   }
   return 0;
 }
 
 void cw(int rot, int pwm) {
 
-  int pwm_r = pwm + 80;
+  int pwm_r = pwm + 30;
 
   if (rot) {
     digitalWrite(9, LOW);
@@ -82,7 +82,7 @@ void cw(int rot, int pwm) {
 
 void ccw(int rot, int pwm) {
 
-  int pwm_r = pwm + 80;
+  int pwm_r = pwm + 30;
 
   if (rot) {
     digitalWrite(9, LOW);

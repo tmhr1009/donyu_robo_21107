@@ -2,7 +2,9 @@
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
 #include <utility/imumaths.h>
+#include <SoftwareSerial.h>
 
+SoftwareSerial softSerial(6,7); //RX, TX
 Adafruit_BNO055 bno = Adafruit_BNO055(-1, 0x28);
 
 void setup(void)
@@ -17,6 +19,9 @@ void setup(void)
   delay(1000);
   bno.setExtCrystalUse(true);
   Serial.println("Calibration status values: 0=uncalibrated, 3=fully calibrated");
+
+  softSerial.begin(9600);
+  softSerial.print("?");
 }
 
 
@@ -25,40 +30,39 @@ void loop() {
   int gyro_x = euler.x();
   Serial.println(euler.x());
 
-  //moter(0, 0, gyro_x);
+  voice();
 
   //方向補正
   if (gyro_x < 359.50 && gyro_x > 180) {
-    cw(0, 120);
+    cw(0, 150);
   } else if (gyro_x > 0.50 && gyro_x < 180) {
-    ccw(0, 120);
+    ccw(0, 150);
   } else {
-    moter(0, 120);
+    moter(0, 150);
   }
 
-  //delay(5);
 }
 
 void moter(int rot, int pwm) {
-  int pwm_r = pwm;
+  int pwm_l = pwm + 30;
 
   if (rot) {
     digitalWrite(9, LOW);
-    analogWrite(3, pwm);
-    analogWrite(10, pwm_r);
+    analogWrite(3, pwm_l);
+    analogWrite(10, pwm);
     digitalWrite(11, LOW);
   } else {
-    analogWrite(9, pwm);
+    analogWrite(9, pwm_l);
     digitalWrite(3, LOW);
     digitalWrite(11, LOW);
-    analogWrite(10, pwm_r);
+    analogWrite(10, pwm);
   }
   return 0;
 }
 
 void cw(int rot, int pwm) {
 
-  int pwm_r = pwm + 80;
+  int pwm_r = pwm + 50;
 
   if (rot) {
     digitalWrite(9, LOW);
@@ -72,17 +76,11 @@ void cw(int rot, int pwm) {
     analogWrite(10, pwm_r);
   }
   return 0;
-
-  //  digitalWrite(3, LOW);
-  //  analogWrite(9, LOW);
-  //  digitalWrite(10, LOW);
-  //  analogWrite(11, 100);
-  //  return 0;
 }
 
 void ccw(int rot, int pwm) {
 
-  int pwm_r = pwm + 80;
+  int pwm_r = pwm + 50;
 
   if (rot) {
     digitalWrite(9, LOW);
@@ -91,18 +89,11 @@ void ccw(int rot, int pwm) {
     digitalWrite(10, LOW);
   } else {
     analogWrite(9, pwm_r);
-    digitalWrite(3, LOW); 
+    digitalWrite(3, LOW);
     digitalWrite(11, LOW);
     analogWrite(10, pwm);
   }
   return 0;
-
-
-//  analogWrite(3, LOW);
-//  digitalWrite(9, LOW);
-//  analogWrite(10, 100);
-//  digitalWrite(11, LOW);
-//  return 0;
 }
 
 void brake_moter() {
@@ -112,4 +103,9 @@ void brake_moter() {
   digitalWrite(11, HIGH);
   digitalWrite(13, HIGH);
   return 0;
+}
+
+void voice() {
+  softSerial.print("ieeeeeeeeeeeeeeeeeeee-------i!\r");
+  delay(3000);
 }

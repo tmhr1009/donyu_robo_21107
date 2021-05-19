@@ -28,32 +28,39 @@ void loop() {
   //moter(0, 0, gyro_x);
 
   //方向補正
-  if (gyro_x < 358 && gyro_x > 180) {
+  if (gyro_x < 357 && gyro_x > 180) {
     ccw();
-  } else if (gyro_x > 2 && gyro_x < 180) {
-    cw();
-  } else {
-    brake_moter();
+  } else if (gyro_x > 3 && gyro_x < 180) {
+    ccw();
+  } else if (gyro_x > 357 || gyro_x < 3) {
+    moter_left(75);
+    digitalWrite(10, LOW);
+    analogWrite(11, 100);
+    Serial.println("11111111111");
   }
 
   //delay(50);
 }
 
 void cw() {
+  digitalWrite(9, LOW);
   digitalWrite(3, LOW);
-  analogWrite(9, LOW);
   digitalWrite(10, LOW);
   analogWrite(11, 100);
   return 0;
 }
 
-
 void ccw() {
-  analogWrite(3, LOW);
+  digitalWrite(3, LOW);
   digitalWrite(9, LOW);
   analogWrite(10, 100);
   digitalWrite(11, LOW);
   return 0;
+}
+
+void moter_left(int pwm) {
+  analogWrite(3, pwm);
+  digitalWrite(9, LOW);
 }
 
 void brake_moter() {
