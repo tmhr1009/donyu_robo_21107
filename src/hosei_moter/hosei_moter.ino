@@ -40,7 +40,7 @@ void loop() {
 }
 
 void moter(int rot, int pwm) {
-  int pwm_l = pwm -30;
+  int pwm_l = pwm - 30;
 
   if (rot) {
     digitalWrite(9, LOW);
@@ -91,18 +91,18 @@ void ccw(int rot, int pwm) {
     digitalWrite(10, LOW);
   } else {
     analogWrite(9, pwm_r);
-    digitalWrite(3, LOW); 
+    digitalWrite(3, LOW);
     digitalWrite(11, LOW);
     analogWrite(10, pwm);
   }
   return 0;
 
 
-//  analogWrite(3, LOW);
-//  digitalWrite(9, LOW);
-//  analogWrite(10, 100);
-//  digitalWrite(11, LOW);
-//  return 0;
+  //  analogWrite(3, LOW);
+  //  digitalWrite(9, LOW);
+  //  analogWrite(10, 100);
+  //  digitalWrite(11, LOW);
+  //  return 0;
 }
 
 void brake_moter() {
