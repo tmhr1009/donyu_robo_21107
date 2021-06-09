@@ -18,8 +18,8 @@ void setup(void)
 
 float r_pgain = 7;
 float l_pgain = 7;
-float r_igain = 0.09; //I制御
-float l_igain = 0.09; //I制御
+float r_igain = 0.09; //右モータのI(積分)ゲイン
+float l_igain = 0.09; //左モータのI(積分)ゲイン
 float integ = 0; //I制御
 int goal = 0;
 
@@ -32,10 +32,10 @@ void loop() {
   goal = 180 - gyro_x;
   integ = integ + goal;
   if (abs(goal) < 1)integ = 0;
-  float vl = -1 * goal * l_pgain - 1 * integ * l_igain; //I制御(integ追加)
-  float vr = goal * r_pgain + 1 * integ * r_igain; //I制御(integ追加)
+  float vl = -1 * goal * l_pgain - 1 * integ * l_igain; //(- 1 * integ * l_igain)追加
+  float vr = goal * r_pgain + 1 * integ * r_igain; //(+ 1 * integ * r_igain)追加
 
-  vr = min(max(vr, -255), 255); //PWMが255を超えないようにする
+  vr = min(max(vr, -255), 255);
   vl = min(max(vl, -255), 255);
 
   if (vr < 0) {

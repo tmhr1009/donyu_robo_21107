@@ -20,12 +20,12 @@ float r_pgain = 7;
 float l_pgain = 7;
 float r_igain = 0.09;
 float l_igain = 0.09;
-float r_dgain = 0.15;
-float l_dgain = 0.15;
-float presabun = 0;
+float r_dgain = 0.15; //右モータのD(微分)ゲイン
+float l_dgain = 0.15; //左モータのD(微分)ゲイン
+float presabun = 0; //目標値までの度数を格納
 float integ = 0;
 int goal = 0;
-int spd = 120;
+int spd = 120; //まっすぐ進むときの速度
 
 void loop() {
   imu::Vector<3> euler = bno.getVector(Adafruit_BNO055::VECTOR_EULER);
@@ -33,11 +33,15 @@ void loop() {
   int gyro_x = euler.x();
   Serial.print("0,360,180,");
   Serial.println(euler.x());
-  presabun = goal;
+  presabun = goal; //目標値までの度数を記憶
   goal = 180 - gyro_x;
   integ = integ + goal;
-  if (abs(goal) < 1)integ = 0;
+  if (abs(goal) < 1)integ = 0; //目標値まで1度未満になったらinteg = 0
+
+  //(goal - presabun) 目標値までの度数と1つ前の度数の差
+  //(+ (goal - presabun) * l_dgain + (float)spd)追加
   float vl = -1 * goal * l_pgain - 1 * integ * l_igain + (goal - presabun) * l_dgain + (float)spd;
+  //(- (goal - presabun) * r_dgain + (float)spd)追加
   float vr = goal * r_pgain + 1 * integ * r_igain - (goal - presabun) * r_dgain + (float)spd;
 
   vr = min(max(vr, -255), 255);
@@ -59,5 +63,5 @@ void loop() {
     digitalWrite(10, LOW);
     analogWrite(11, vl);
   }
-  delay(10);
+  delay(10); //微積分が速すぎるのでdelay
 }
