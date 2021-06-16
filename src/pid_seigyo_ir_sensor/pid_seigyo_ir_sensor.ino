@@ -9,7 +9,7 @@ SoftwareSerial softSerial(7, 8); //RX, TX
 Adafruit_BNO055 bno = Adafruit_BNO055(-1, 0x28);
 
 void center1();
-TimedAction moterAction = TimedAction(750, center1);
+TimedAction moterAction = TimedAction(800, center1);
 
 void setup(void)
 {
@@ -22,14 +22,16 @@ void setup(void)
   bno.setExtCrystalUse(true);
   softSerial.begin(9600);
   softSerial.print("?");
+  delay(100);
+  softSerial.print("ok \r");
 }
 
 float r_pgain = 5; //7
 float l_pgain = 5; //7
-float r_igain = 0.12; //0.10
-float l_igain = 0.12; //0.10
+float r_igain = 0.10; //0.10
+float l_igain = 0.10; //0.10
 float r_dgain = 0.15; //右モータのD(微分)ゲイン 0.15
-float l_dgain = 0.15; //左モータのD(微分)ゲイン0.15
+float l_dgain = 0.15; //左モータのD(微分)ゲイン 0.15
 float presabun = 0; //目標値までの度数を格納
 float integ = 0;
 int goal = 0;
@@ -40,8 +42,6 @@ int mokuhyou = 180; //目標度数
 void loop() {
   imu::Vector<3> euler = bno.getVector(Adafruit_BNO055::VECTOR_EULER);
 
-  Serial.print(mokuhyou);
-  Serial.print("  ,  goal == ");
   if (mokuhyou == 0) {
     mokuhyou = 270;
   }
@@ -50,25 +50,22 @@ void loop() {
   }
 
   int gyro_x = euler.x();
-  int gyro_y = euler.y();
   presabun = goal; //目標値までの度数を記憶
   goal = mokuhyou - gyro_x;
   integ = integ + goal;
-  if (abs(goal) < 1)integ = 0; //目標値まで1度未満になったらinteg = 0
-
-  Serial.println(goal);
+  if (abs(goal) < 1)integ = 0; //目標値まで1度未満になったら停止
 
   int a0 = analogRead(A0);
   int a1 = analogRead(A1);
   int a2 = analogRead(A2);
 
-  //A0=Right, A1=Center, A2=Left softSerial.begin(9600);
-  if (a0 > 500) softSerial.print("migi \r");
-  if (a1 > 500) softSerial.print("zenpou \r");
-  if (a2 > 500) softSerial.print("hidari \r");
+  //A0=Right, A1=Center, A2=Left
+  if (a0 > 600) softSerial.print("migi \r");
+  if (a1 > 600) softSerial.print("mae \r");
+  if (a2 > 600) softSerial.print("hidari \r");
 
 
-  if (a1 > 500 || a0 > 500 || a2 > 500) {
+  if (a1 > 600 || a0 > 600 || a2 > 600) {
     sped = spd * 0;
     moterAction.check();
   } else if (a1 > 300) {
@@ -110,13 +107,44 @@ void center1() {
   int a1 = analogRead(A1);
   int a2 = analogRead(A2);
 
-  if (a1 > 500 || a0 > 500 || a2 > 500) {
-    if (a0 > 500) {
+  //いずれかのIRが反応
+  //A0=Right, A1=Center, A2=Left
+  if (a1 > 600 || a0 > 600 || a2 > 600) {
+
+    //前反応
+    if (a1 > 600) {
+      if (a0 > 600) {
+        //前と右に反応
+        //左に90°回転
+        mokuhyou = mokuhyou - 90;
+
+      } else if (a2 > 600) {
+        //前と左に反応
+        //右に90°回転
+        mokuhyou = mokuhyou + 90;
+
+      }
+      //前だけ反応
+      //右に90°回転
+      mokuhyou = mokuhyou + 90;
+
+      //左反応
+    } else if (a2 > 550) {
+      if (a0 > 550) {
+        //左と右に反応
+        //なし
+        mokuhyou = mokuhyou;
+
+      }
+      //左だけ反応
+      //右に90°回転
+      mokuhyou = mokuhyou + 90;
+
+      //右反応
+    } else if (a0 > 550) {
+      //右のみ反応
+      //左に90°回転
       mokuhyou = mokuhyou - 90;
-    } else if (a2 > 500) {
-      mokuhyou = mokuhyou + 90;
-    } else {
-      mokuhyou = mokuhyou + 90;
     }
   }
 }
