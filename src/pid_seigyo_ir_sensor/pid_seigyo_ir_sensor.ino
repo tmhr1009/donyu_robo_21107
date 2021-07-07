@@ -9,7 +9,7 @@ SoftwareSerial softSerial(7, 8); //RX, TX
 Adafruit_BNO055 bno = Adafruit_BNO055(-1, 0x28);
 
 void center1();
-TimedAction moterAction = TimedAction(800, center1);
+TimedAction moterAction = TimedAction(1000, center1);
 
 void setup(void)
 {
@@ -23,7 +23,6 @@ void setup(void)
   softSerial.begin(9600);
   softSerial.print("?");
   delay(100);
-  softSerial.print("ok \r");
 }
 
 float r_pgain = 5; //7
@@ -35,9 +34,15 @@ float l_dgain = 0.15; //左モータのD(微分)ゲイン 0.15
 float presabun = 0; //目標値までの度数を格納
 float integ = 0;
 int goal = 0;
-int spd = 125; //まっすぐ進むときの速度
+int spd = 150; //まっすぐ進むときの速度
 int sped = 0; //まっすぐ進むときの速度
 int mokuhyou = 180; //目標度数
+
+//ボイス操作用
+int c1 = 0;
+int c2 = 0;
+int c3 = 0;
+int c4 = 0;
 
 void loop() {
   imu::Vector<3> euler = bno.getVector(Adafruit_BNO055::VECTOR_EULER);
@@ -61,7 +66,7 @@ void loop() {
 
   //A0=Right, A1=Center, A2=Left
   if (a0 > 600) softSerial.print("migi \r");
-  if (a1 > 600) softSerial.print("mae \r");
+  if (a1 > 600) softSerial.print("ma'e \r");
   if (a2 > 600) softSerial.print("hidari \r");
 
 
@@ -99,6 +104,28 @@ void loop() {
     digitalWrite(10, LOW);
     analogWrite(11, vl);
   }
+
+  //mae, migi, hidari, migi
+  if (a1 > 600) {
+    c1 = 1;
+  }
+  if (a0 > 600 && c1 == 1) {
+    c2 = 1;
+  }
+  if (a2 > 600 && c2 == 1) {
+    c3 = 1;
+  }
+  if (a0 > 600 && c3 == 1) {
+    c4 = 1;
+  }
+  if (c4 == 1) {
+    //softSerial.print("hharo- \r");
+    c1 = 0;
+    c2 = 0;
+    c3 = 0;
+    c4 = 0;
+  }
+
   delay(20); //微積分が早すぎるのでdelay
 }
 
